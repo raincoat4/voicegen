@@ -1,4 +1,1 @@
-import pandas as pd
-
-file = pd.read_csv('data.csv')
-print(file)
+from train import model
