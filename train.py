@@ -1,3 +1,6 @@
+#need to figure out a way to make this more accurate
+
+
 import pandas as pd
 from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import train_test_split
@@ -16,22 +19,29 @@ def updateDf():
 def toInt(flt):
     return int(flt)
 
-#try random stuff here
-def cutMFCC(mfcc, max_length=5):
-    mfcc = mfcc.split(",")  # Assuming mfcc is a comma-separated string
+#first 5 elements
+def f5MFCC(mfcc):
+    mfcc = mfcc.split(",")
+    mfcc = mfcc[:10]
+    mfcc = [float(x) for x in mfcc]
+    return mfcc
+
+#using length
+def lenMFCC(mfcc, max_length=5):
+    mfcc = mfcc.split(",")  #mfcc is a comma-separated string
     mfcc = str(len(mfcc))
-    mfcc = [int(digit) for digit in mfcc]  # Convert strings to integers
+    mfcc = [int(digit) for digit in mfcc]  #convert strings to integers
     if len(mfcc) < max_length:
-        # Pad the sequence with zeros if its length is less than max_length
+        #pad the sequence with zeros if its length is less than max_length
         mfcc = [0] * (max_length - len(mfcc)) + mfcc
     elif len(mfcc) > max_length:
-        # Truncate the sequence if its length is greater than max_length
+        #truncate the sequence if its length is greater than max_length
         mfcc = mfcc[:max_length]
     return mfcc
 
 data = feather.read_dataframe("./archive/data.feather")
-#data = data.head(6000)
-data["mfcc"] = data["mfcc"].apply(cutMFCC)
+#data = data.head(60)
+data["mfcc"] = data["mfcc"].apply(f5MFCC)
 X = data["mfcc"]
 
 data["age"] = data["age"].apply(toInt)
