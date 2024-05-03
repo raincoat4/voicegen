@@ -20,11 +20,12 @@ def toInt(flt):
     return int(flt)
 
 #first 5 elements
-def f5MFCC(mfcc):
-    mfcc = mfcc.split(",")
-    mfcc = mfcc[:10]
+def f5MFCC(row):
+    mfcc = row["mfcc"].split(",")[:100]
     mfcc = [float(x) for x in mfcc]
-    return mfcc
+    age = row["age"]
+    mfcc_with_age = [age] + mfcc
+    return mfcc_with_age
 
 #using length
 def lenMFCC(mfcc, max_length=5):
@@ -39,13 +40,28 @@ def lenMFCC(mfcc, max_length=5):
         mfcc = mfcc[:max_length]
     return mfcc
 
+#0 for male, 1 for female
+def sex2bool(sex):
+    return 0 if sex == "male" else 1
+
+def fixLang(lang):
+    #maybe eventually remove the whole row but this is a filler
+    return "fill" if lang == None else lang
+
 data = feather.read_dataframe("./archive/data.feather")
 #data = data.head(60)
-data["mfcc"] = data["mfcc"].apply(f5MFCC)
-X = data["mfcc"]
+
+data["sex"] = data["sex"].apply(sex2bool)
 
 data["age"] = data["age"].apply(toInt)
-y = data["age"].values
+
+data["mfcc_with_sex_age"] = data.apply(f5MFCC, axis=1)
+X = data["mfcc_with_sex_age"]
+
+data["native_language"] = data["native_language"].apply(fixLang)
+y = data["sex"].values
+
+print(X, y)
 X_train, X_valid, y_train, y_valid = train_test_split(X, y)
 model = GaussianNB()
 
