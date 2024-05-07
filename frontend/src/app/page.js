@@ -4,7 +4,7 @@ import axios from 'axios';
 
 function App() {
   const [result, setResult] = useState('');
-
+  
   useEffect(() => {
     fetchData();
   }, []);
