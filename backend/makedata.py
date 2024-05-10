@@ -5,7 +5,7 @@ import numpy as np
 import feather
 
 def pathExists(missing):
-    return missing == "FALSE"
+    return not missing
 
 def filenameFixer(file):
     ret = './archive/recordings/recordings/' + file + '.mp3'
@@ -22,4 +22,5 @@ df['pathExists'] = df['file_missing?'].apply(pathExists)
 df['filename'] = df['filename'].apply(filenameFixer)
 df = df[df['pathExists']]
 df['mfcc'] = df['filename'].apply(getMfcc)
+
 feather.write_dataframe(df, "./archive/data.feather")

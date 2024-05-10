@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 import ast
 import numpy as np
 import feather
+import joblib
 
 def makeMatrix(file):
     return np.array(ast.literal_eval(file))
@@ -21,7 +22,7 @@ def toInt(flt):
 
 #first 5 elements
 def f5MFCC(row):
-    mfcc = row["mfcc"].split(",")[:100]
+    mfcc = row["mfcc"].split(",")[:5]
     mfcc = [float(x) for x in mfcc]
     age = row["age"]
     mfcc_with_age = [age] + mfcc
@@ -50,18 +51,17 @@ def fixLang(lang):
 
 data = feather.read_dataframe("./archive/data.feather")
 #data = data.head(60)
-
 data["sex"] = data["sex"].apply(sex2bool)
 
 data["age"] = data["age"].apply(toInt)
-
+#print(data)
 data["mfcc_with_sex_age"] = data.apply(f5MFCC, axis=1)
 X = data["mfcc_with_sex_age"]
 
 data["native_language"] = data["native_language"].apply(fixLang)
 y = data["sex"].values
 
-print(X, y)
+#print(X, y)
 X_train, X_valid, y_train, y_valid = train_test_split(X, y)
 model = GaussianNB()
 
@@ -73,7 +73,9 @@ model.fit(X_train, y_train)
 X_valid = np.array(X_valid.tolist())
 y_valid = np.array(y_valid)
 score = model.score(X_valid, y_valid)
-print("Model Score:", score)
+#print("Model Score:", score)
+# Save the model to a file
+joblib.dump(model, 'trained_model.pkl')
 
 #prints out predictions for all valid sets
 # for X_sample, y_sample in zip(X_valid, y_valid):

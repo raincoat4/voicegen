@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# Start frontend
-cd frontend
-npm run dev &
-
 # Start backend
-cd ../backend
-python3 predict.py
+cd backend
+python3 predict.py &
+
+# Start frontend
+cd ../frontend
+npm run dev 
+
