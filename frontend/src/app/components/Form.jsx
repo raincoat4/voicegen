@@ -32,6 +32,7 @@ export default function Form() {
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
+          className = "text-black"
         />
       </label>
       <button type="submit">Submit</button>
