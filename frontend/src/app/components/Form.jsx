@@ -1,41 +1,53 @@
-// components/Form.js
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Form() {
   const [inputValue, setInputValue] = useState('');
+  const [data, setData] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    
-    const response = await fetch('./api/send-input', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ inputValue }),
-    });
-
-    if (response.ok) {
-      // Handle successful response
-      console.log('Input sent successfully');
-    } else {
-      // Handle error response
-      console.error('Error sending input');
+  useEffect(() => {
+    if (submitted) {
+      fetch('http://127.0.0.1:5000/backend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ inputValue })
+      })
+        .then(response => response.json()) // Assuming the backend returns JSON
+        .then(data => {
+          setData(data);
+          console.log(data);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        })
+        .finally(() => {
+          setSubmitted(false); // Reset submission state
+        });
     }
+  }, [submitted, inputValue]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault(); // Prevent default form submission
+    setSubmitted(true);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label>
-        Input:
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          className = "text-black"
-        />
-      </label>
-      <button type="submit">Submit</button>
-    </form>
+    <>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Input:
+          <input
+            type="text"
+            className="text-black"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+          />
+        </label>
+        <button type="submit">Submit</button>
+      </form>
+      {data === '' ? <p>no data submitted</p> : <p>{JSON.stringify(data)}</p>}
+    </>
   );
 }
