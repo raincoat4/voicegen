@@ -8,10 +8,9 @@ import io
 import joblib
 import logging
 
-# Initialize logging
+# just put this here
 logging.basicConfig(level=logging.DEBUG)
 
-# Load the pre-trained model
 model = joblib.load('trained_model.pkl')
 
 def get_mfcc(file_path):
@@ -71,7 +70,7 @@ def upload_file():
         mfcc = get_mfcc(filepath)
         mfcc2 = len_mfcc(mfcc)
         
-        # Convert to numpy array and reshape for model input
+        # convert to numpy array and reshape for model input
         mfcc2 = np.array(mfcc2).reshape(1, -1)
         logging.debug(f"Input for model: {mfcc2}")
 
