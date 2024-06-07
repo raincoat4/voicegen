@@ -75,13 +75,13 @@ y_valid = np.array(y_valid)
 score = model.score(X_valid, y_valid)
 #print("Model Score:", score)
 # Save the model to a file
-joblib.dump(model, 'trained_model.pkl')
+#joblib.dump(model, 'trained_model.pkl')
 
 #prints out predictions for all valid sets
-# for X_sample, y_sample in zip(X_valid, y_valid):
-#     X_sample = np.array(X_sample).reshape(1, -1)  # Reshape to ensure it's a 2D array
-#     prediction = model.predict(X_sample)
-#     print("Age is", prediction[0], "Actual age:", y_sample)
+for X_sample, y_sample in zip(X_valid, y_valid):
+    X_sample = np.array(X_sample).reshape(1, -1)  # Reshape to ensure it's a 2D array
+    prediction = model.predict(X_sample)
+    print("Gender is", prediction[0], "Actual gender:", y_sample)
 #Save the score to a text file
-# with open("model_score.txt", "w") as f:
-#     f.write("Model Score: " + str(score))
+with open("model_score.txt", "w") as f:
+    f.write("Model Score: " + str(score))

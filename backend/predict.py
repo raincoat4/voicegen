@@ -1,40 +1,91 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from train import model, X_valid, y_valid
-import joblib
+import os
+from pydub import AudioSegment
 import numpy as np
+import python_speech_features as psf
+import io
+import joblib
+import logging
+
+# Initialize logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Load the pre-trained model
+model = joblib.load('trained_model.pkl')
+
+def get_mfcc(file_path):
+    try:
+        logging.debug(f"Processing file: {file_path}")
+        audio = AudioSegment.from_file(file_path)
+        audio = audio.set_channels(1)
+        wav_io = io.BytesIO()
+        audio.export(wav_io, format='wav')
+        wav_io.seek(0)
+
+        sample_rate = audio.frame_rate
+        signal = np.frombuffer(wav_io.read(), dtype=np.int16)
+
+        frame_length = 0.025  # 25ms frame length in seconds
+        nfft = int(frame_length * sample_rate)
+        mfccs = psf.mfcc(signal, samplerate=sample_rate, numcep=13, nfft=nfft)
+        logging.debug(f"MFCCs shape: {mfccs.shape}")
+        return ','.join(map(str, mfccs.flatten()))
+    except Exception as e:
+        logging.error(f"Error processing audio file: {e}")
+        raise RuntimeError(f"Error processing audio file: {e}")
+
+def len_mfcc(mfcc, max_length=6):
+    mfcc = mfcc.split(",")
+    mfcc_len = len(mfcc)
+    mfcc = [int(digit) for digit in str(mfcc_len)]
+    if len(mfcc) < max_length:
+        mfcc = [0] * (max_length - len(mfcc)) + mfcc
+    elif len(mfcc) > max_length:
+        mfcc = mfcc[:max_length]
+    return mfcc
 
 app = Flask(__name__)
 CORS(app)
 
-# # Load the trained model
-# model = joblib.load('trained_model.pkl')
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# # Example input for testing
-# testInput = X_valid[0]
-# testInput = np.array(testInput).reshape(1, -1)
-# result = model.predict(testInput)
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        logging.error("No file part in the request")
+        return jsonify({'error': 'No file part in the request'}), 400
 
+    file = request.files['file']
 
-@app.route('/backend', methods=['GET', 'POST'])
-def handle_request():
-    if request.method == 'POST':
-        data = str(request) + "hi"
-        return jsonify(data)
-    else:
-        return jsonify({'message':'fail'})
-    # if request.method == 'POST':
-    #     # Handle data sent from the frontend
-    #     data = request.json
-    #     input_value = data.get('inputValue')
-    #     if input_value:
-    #         # Process the input_value as needed
-    #         return jsonify({"message": "Input received successfully"}), 200
-    #     else:
-    #         return jsonify({"message": "Invalid input"}), 400
-    # elif request.method == 'GET':
-    #     # Handle data retrieval for the frontend
-    #     return jsonify({"message": "Here is the data from the backend"}), 200
+    if file.filename == '':
+        logging.error("No file selected for uploading")
+        return jsonify({'error': 'No file selected for uploading'}), 400
+
+    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+    try:
+        file.save(filepath)
+        logging.debug(f"File saved to: {filepath}")
+        
+        mfcc = get_mfcc(filepath)
+        mfcc2 = len_mfcc(mfcc)
+        
+        # Convert to numpy array and reshape for model input
+        mfcc2 = np.array(mfcc2).reshape(1, -1)
+        logging.debug(f"Input for model: {mfcc2}")
+
+        result = model.predict(mfcc2)
+        logging.debug(f"Model prediction: {result}")
+
+        return jsonify({'mfcc2': mfcc2.tolist(), 'result': result.tolist()}), 200
+    except Exception as e:
+        logging.error(f"Processing error: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            logging.debug(f"File removed: {filepath}")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

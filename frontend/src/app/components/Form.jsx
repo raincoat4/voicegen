@@ -1,53 +1,70 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
+import axios from 'axios';
 
 export default function Form() {
-  const [inputValue, setInputValue] = useState('');
-  const [data, setData] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const [responseData, setResponseData] = useState('')
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
-  useEffect(() => {
-    if (submitted) {
-      fetch('http://127.0.0.1:5000/backend', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ inputValue })
-      })
-        .then(response => response.json()) // Assuming the backend returns JSON
-        .then(data => {
-          setData(data);
-          console.log(data);
-        })
-        .catch(error => {
-          console.error('Error fetching data:', error);
-        })
-        .finally(() => {
-          setSubmitted(false); // Reset submission state
-        });
+  const startRecording = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorderRef.current = new MediaRecorder(stream);
+    audioChunksRef.current = [];
+
+    mediaRecorderRef.current.ondataavailable = event => {
+      audioChunksRef.current.push(event.data);
+    };
+
+    mediaRecorderRef.current.onstop = () => {
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+      setAudioBlob(audioBlob);
+    };
+
+    mediaRecorderRef.current.start();
+    setRecording(true);
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current.stop();
+    setRecording(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!audioBlob) {
+      alert('Please record audio first!');
+      return;
     }
-  }, [submitted, inputValue]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Prevent default form submission
-    setSubmitted(true);
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'recording.wav');
+
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log(response.data.result[0]);
+      setResponseData(response.data.result[0])
+    } catch (error) {
+      console.error('Error uploading audio file:', error);
+    }
   };
 
   return (
     <>
+      <button onClick={recording ? stopRecording : startRecording}>
+        {recording ? 'Stop Recording' : 'Start Recording'}
+      </button>
       <form onSubmit={handleSubmit}>
-        <label>
-          Input:
-          <input
-            type="text"
-            className="text-black"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-          />
-        </label>
         <button type="submit">Submit</button>
       </form>
-      {data === '' ? <p>no data submitted</p> : <p>{JSON.stringify(data)}</p>}
+      <div>
+        {responseData === '' ? <p>send a recording</p> : responseData === 0 ? <p>male</p> : <p>female</p>}
+      </div>
     </>
   );
 }
