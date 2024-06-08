@@ -5,10 +5,12 @@ export default function Form() {
   const [recording, setRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [responseData, setResponseData] = useState('')
+  const [submitted, setSubmitted] = useState(false)
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
   const startRecording = async () => {
+    setSubmitted(false)
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     mediaRecorderRef.current = new MediaRecorder(stream);
     audioChunksRef.current = [];
@@ -32,6 +34,7 @@ export default function Form() {
   };
 
   const handleSubmit = async (e) => {
+    setSubmitted(true)
     e.preventDefault();
     if (!audioBlob) {
       alert('Please record audio first!');
@@ -47,7 +50,7 @@ export default function Form() {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log(response.data.result[0]);
+      console.log(response.data);
       setResponseData(response.data.result[0])
     } catch (error) {
       console.error('Error uploading audio file:', error);
@@ -55,16 +58,30 @@ export default function Form() {
   };
 
   return (
-    <>
-      <button onClick={recording ? stopRecording : startRecording}>
+    <div className = "flex flex-col items-center justify-center space-y-10">
+      <button className = "btn btn-outline btn-error" onClick={recording ? stopRecording : startRecording}>
         {recording ? 'Stop Recording' : 'Start Recording'}
       </button>
-      <form onSubmit={handleSubmit}>
-        <button type="submit">Submit</button>
+      <form className = "btn btn-outline btn-secondary" onSubmit={handleSubmit}>
+        <div className="tooltip" data-tip="if nothing happens, click again!">
+          <button type="submit">Submit</button>
+        </div>
       </form>
       <div>
-        {responseData === '' ? <p>send a recording</p> : responseData === 0 ? <p>male</p> : <p>female</p>}
+        <div>
+          {/* make this text box be the message that was said */}
+          <div className="chat chat-start">
+            <div className="chat-bubble chat-bubble-info">Send a recording! Please wait a bit during submissions.</div>
+          </div>
+        </div>
+        {!recording && submitted && (
+          <div className="chat chat-end">
+            <div className="chat-bubble chat-bubble-accent">{responseData === 0 ? 'Male Voice Detected' : 'Female Voice Detected'}</div>
+          </div>
+        )}
+
+
       </div>
-    </>
+    </div>
   );
 }

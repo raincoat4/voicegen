@@ -1,34 +1,18 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 import Form from './components/Form';
 
 function App() {
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
-
-  // useEffect(() => {
-  //   fetchData();
-  // }, []);
-
-  // const fetchData = async () => {
-  //   try {
-  //     const response = await axios.get('http://127.0.0.1:5000/backend');
-  //     setResult(response.data); // response.data contains the JSON object
-  //   } catch (error) {
-  //     setError('Error fetching data');
-  //     console.error('Error:', error);
-  //   }
-  // };
 
   return (
-    <div>
-      {/* <h1>Result:</h1>
-      {result ? <p>{result.message}</p> : <p>Loading...</p>}
-      {error && <p>{error}</p>}
-      <Form /> */}
+    <>
+    <div className="navbar bg-base-100">
+      <a className="btn btn-ghost text-xl">Voice Recognition</a>
+    </div>
+    <div className = "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
       <Form/>
     </div>
+    </>
   );
 }
 
