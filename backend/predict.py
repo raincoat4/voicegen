@@ -35,7 +35,6 @@ def get_mfcc(file_path):
         raise RuntimeError(f"Error processing audio file: {e}")
 
 def len_mfcc(mfcc, max_length=6):
-    mfcc = mfcc.split(",")
     mfcc_len = len(mfcc)
     mfcc = [int(digit) for digit in str(mfcc_len)]
     if len(mfcc) < max_length:

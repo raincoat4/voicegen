@@ -29,8 +29,8 @@ def f5MFCC(row):
     return mfcc_with_age
 
 #using length
-def lenMFCC(mfcc, max_length=5):
-    mfcc = mfcc.split(",")  #mfcc is a comma-separated string
+def lenMFCC(mfcc, max_length=6):
+    #mfcc = mfcc.split(",")  #mfcc is a comma-separated string
     mfcc = str(len(mfcc))
     mfcc = [int(digit) for digit in mfcc]  #convert strings to integers
     if len(mfcc) < max_length:
@@ -47,7 +47,10 @@ def sex2bool(sex):
 
 def fixLang(lang):
     #maybe eventually remove the whole row but this is a filler
-    return "fill" if lang == None else lang
+    return "fill" if lang == None else lang.title()
+
+def fixX(mfcc):
+    return np.array(mfcc).reshape(1, -1).flatten()
 
 data = feather.read_dataframe("./archive/data.feather")
 #data = data.head(60)
@@ -56,17 +59,24 @@ data["sex"] = data["sex"].apply(sex2bool)
 data["age"] = data["age"].apply(toInt)
 #print(data)
 data["mfcc_with_sex_age"] = data.apply(f5MFCC, axis=1)
-X = data["mfcc_with_sex_age"]
 
 data["native_language"] = data["native_language"].apply(fixLang)
-y = data["sex"].values
+data["country"] = data["country"].apply(fixLang)
+data["mfcc_with_sex_age"] = data["mfcc_with_sex_age"].apply(lenMFCC)
+data["mfcc"] = data["mfcc"].apply(lenMFCC)
+data["mfcc"] = data["mfcc"].apply(fixX)
 
-#print(X, y)
+X = data["mfcc"]
+y = data["country"].values
+
+data.to_csv("output.txt")
+print(X, y)
 X_train, X_valid, y_train, y_valid = train_test_split(X, y)
 model = GaussianNB()
 
 X_train = np.array(X_train.tolist())
 y_train = np.array(y_train)
+
 model.fit(X_train, y_train)
 
 #Calculate and print the score of the model
@@ -75,13 +85,13 @@ y_valid = np.array(y_valid)
 score = model.score(X_valid, y_valid)
 #print("Model Score:", score)
 # Save the model to a file
-#joblib.dump(model, 'trained_model.pkl')
+joblib.dump(model, 'trained_model.pkl')
 
 #prints out predictions for all valid sets
 for X_sample, y_sample in zip(X_valid, y_valid):
     X_sample = np.array(X_sample).reshape(1, -1)  # Reshape to ensure it's a 2D array
     prediction = model.predict(X_sample)
-    print("Gender is", prediction[0], "Actual gender:", y_sample)
+    print("Country is", prediction[0], "Actual Country:", y_sample)
 #Save the score to a text file
 with open("model_score.txt", "w") as f:
     f.write("Model Score: " + str(score))
