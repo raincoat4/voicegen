@@ -34,13 +34,16 @@ def get_mfcc(file_path):
         logging.error(f"Error processing audio file: {e}")
         raise RuntimeError(f"Error processing audio file: {e}")
 
-def len_mfcc(mfcc, max_length=6):
-    mfcc_len = len(mfcc)
-    mfcc = [int(digit) for digit in str(mfcc_len)]
-    if len(mfcc) < max_length:
-        mfcc = [0] * (max_length - len(mfcc)) + mfcc
-    elif len(mfcc) > max_length:
-        mfcc = mfcc[:max_length]
+def len_mfcc(mfcc, max_length=20):
+    mfcc = mfcc.split(",")  #mfcc is a comma-separated string
+    mfcc = mfcc[:max_length]
+    def to_int_or_zero(value):
+        try:
+            return float(value)
+        except ValueError:
+            return 0
+    
+    mfcc = [to_int_or_zero(digit) for digit in mfcc]
     return mfcc
 
 app = Flask(__name__)

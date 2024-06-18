@@ -71,12 +71,12 @@ export default function Form() {
         <div>
           {/* make this text box be the message that was said */}
           <div className="chat chat-start">
-            <div className="chat-bubble chat-bubble-info">Send a recording! Please wait a bit during submissions.</div>
+            <div className="chat-bubble chat-bubble-info">Please record your voice by starting the recording and stopping when you are done. Then click submit!</div>
           </div>
         </div>
         {!recording && submitted && (
           <div className="chat chat-end">
-            <div className="chat-bubble chat-bubble-accent">{responseData === 0 ? 'Male Voice Detected' : 'Female Voice Detected'}</div>
+            <div className="chat-bubble chat-bubble-accent">{'Voice Detected is from: ' + responseData}</div>
           </div>
         )}
 
