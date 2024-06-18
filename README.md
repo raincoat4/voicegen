@@ -1,5 +1,5 @@
 # Voice-Gen
-Determines the country of the speaker.  
+Determines the ethnic background of the speaker.  
 
 To run the project:
 1. cd into the backend, and run the predict.py file using either python, python3 or flask to start the backend server
