@@ -6,10 +6,10 @@ Voice-Gen was created to explore how vocal characteristics can reveal aspects of
 ## What it does 
 Voice-Gen is a sophisticated platform designed to determine the ethnic background of speakers based on their voice recordings. By extracting MFCCs, a key feature in speech processing, the platform accurately classifies recordings using a Gaussian Naive Bayes model. It provides users with insights into how voice characteristics correlate with ethnic identity, offering valuable data for academic research, diversity studies, and personalized user experiences.
 
-## How we built it 
+## How I built it 
 Voice-Gen employs a comprehensive AI-driven approach to analyze and classify voice recordings. The platform uses MFCCs to extract essential features from audio data, which are then fed into a Gaussian Naive Bayes model, trained on thousands of recordings. This model, developed with Pandas, achieves a remarkable test accuracy of 99.13%. Flask is used to create REST API endpoints, allowing seamless data exchange between the frontend and backend. The frontend, built with React and JavaScript, provides a user-friendly interface for uploading and analyzing voice recordings.
 
-## Accomplishments that we're proud of
+## Accomplishments that I'm proud of
 - Achieving a 99.13% test accuracy in classifying the ethnic background of speakers using voice recordings.
 - Successfully integrating AI models and MFCCs for accurate and insightful voice analysis.
 - Developing a robust REST API with Flask to facilitate efficient data exchange and processing.
