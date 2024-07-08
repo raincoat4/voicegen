@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
 import Form from './components/Form';
-import github from '/Users/liamrogers/Documents/code/voicerecog/frontend/github.jpeg';
 
 function App() {
   const reloadPage = () => {
