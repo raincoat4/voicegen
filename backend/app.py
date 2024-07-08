@@ -11,7 +11,15 @@ import logging
 # just put this here
 logging.basicConfig(level=logging.DEBUG)
 
-model = joblib.load('trained_model.pkl')
+try:
+    print("Attempting to load the model...")
+    model = joblib.load('trained_model.pkl')
+    print("Model loaded successfully!")
+except KeyError as e:
+    print(f"KeyError encountered: {e}")
+except Exception as e:
+    print(f"An error occurred: {e}")
+
 
 def get_mfcc(file_path):
     try:
@@ -83,6 +91,7 @@ def upload_file():
     except Exception as e:
         logging.error(f"Processing error: {e}")
         return jsonify({'error': str(e)}), 500
+        
     finally:
         if os.path.exists(filepath):
             os.remove(filepath)

@@ -45,11 +45,11 @@ export default function Form() {
     formData.append('file', audioBlob, 'recording.wav');
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/upload', formData, {
+      const response = await axios.post('https://voice-gen-9640c768fbd8.herokuapp.com/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-      });
+      });3
       console.log(response.data);
       setResponseData(response.data.result[0])
     } catch (error) {
